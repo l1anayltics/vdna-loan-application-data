@@ -1,4 +1,4 @@
-name: saga-build
+name: vdna-loan-app-data-build
 
 on:
   push:
@@ -9,10 +9,15 @@ on:
     branches: [ master ]
     paths: 
       - src/*
+      
+env:
+  WEBAPP_NAME: dna-loan-application-data    # Azure Web App Name
+  WEBAPP_PACKAGE_PATH: '.'      # Project Path Location default to root(.)
+  NUGET_VERSION: '5.3.1'           # dot net version to use
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -32,3 +37,10 @@ jobs:
     - name: Test
       working-directory: ./src
       run: dotnet test --no-restore --verbosity normal
+       
+    - name: 'Run Azure webapp deploy action using publish profile credentials'
+      uses: azure/webapps-deploy@v2
+      with: 
+        app-name: ${{ env.WEBAPP_NAME }} 
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE  }} 
+        package: '${{ env.WEBAPP_PACKAGE_PATH }}/${{ env.WEBAPP_NAME }}/'
